@@ -13,32 +13,18 @@ def udf():
     # Create WFS service
     wfs = WebFeatureService(url=wfs_url, version='2.0.0')
 
-    # Fetch data for CurrentWarnings in GeoJSON format
-    current_warnings_response = wfs.getfeature(typename='watch_warn_adv:CurrentWarnings', outputFormat='GEOJSON')
-    current_warnings_geojson = current_warnings_response.read().decode('utf-8')
-
     # Fetch data for WatchesWarnings in GeoJSON format
-    watches_warnings_response = wfs.getfeature(typename='watch_warn_adv:WatchesWarnings', outputFormat='GEOJSON')
-    watches_warnings_geojson = watches_warnings_response.read().decode('utf-8')
+    hazards_response = wfs.getfeature(typename='watch_warn_adv:WatchesWarnings', outputFormat='GEOJSON')
+    hazards_geojson = hazards_response.read().decode('utf-8')
 
     # Create GeoDataFrames from GeoJSON content
     try:
-        current_warnings_gdf = gpd.GeoDataFrame.from_features(json.loads(current_warnings_geojson)["features"])
-        current_warnings_gdf.set_crs(epsg=4326, inplace=True)
-        print(current_warnings_gdf)
+        hazards_gdf = gpd.GeoDataFrame.from_features(json.loads(hazards_geojson)["features"])
+        hazards_gdf.set_crs(epsg=4326, inplace=True)
+        print(hazards_gdf)
     except Exception as e:
-        print("Error processing CurrentWarnings GeoJSON:", e)
-
-    try:
-        watches_warnings_gdf = gpd.GeoDataFrame.from_features(json.loads(watches_warnings_geojson)["features"])
-        watches_warnings_gdf.set_crs(epsg=4326, inplace=True)
-        print(watches_warnings_gdf)
-    except Exception as e:
-        print("Error processing WatchesWarnings GeoJSON:", e)
+        print("Error processing Hazards GeoJSON:", e)
         
-        
-    # Combine the GeoDataFrames
-    hazards_gdf = gpd.GeoDataFrame(pd.concat([current_warnings_gdf, watches_warnings_gdf], ignore_index=True))
     
     hazards_cmap = {
         "Tsunami Warning": {"hex": "#fd6347", "rgb": [253, 99, 71]},
