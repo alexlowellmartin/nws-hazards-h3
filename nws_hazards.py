@@ -2,8 +2,9 @@
 def udf():
     import pandas as pd
     import geopandas as gpd
-    from owslib.wfs import WebFeatureService
+    import h3
     import json
+    from owslib.wfs import WebFeatureService
 
     # WFS URL for the Watch Warning Advisory (WWA) service
     wfs_url = "https://mapservices.weather.noaa.gov/eventdriven/services/WWA/watch_warn_adv/MapServer/WFSServer"
@@ -12,13 +13,19 @@ def udf():
     wfs = WebFeatureService(url=wfs_url, version='2.0.0')
 
     # Fetch data for WatchesWarnings in GeoJSON format
-    hazards_response = wfs.getfeature(typename='watch_warn_adv:WatchesWarnings', outputFormat='GEOJSON')
-    hazards_geojson = hazards_response.read().decode('utf-8')
+    response = wfs.getfeature(typename='watch_warn_adv:WatchesWarnings', outputFormat='GEOJSON')
+    geojson = response.read().decode('utf-8')
 
     # Create GeoDataFrames from GeoJSON content
-    hazards_gdf = gpd.GeoDataFrame.from_features(json.loads(hazards_geojson)["features"], crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame.from_features(json.loads(geojson)["features"], crs="EPSG:4326")
 
-    hazards_cmap = {
+    # Convert GeoDataFrame geos to h3 cells
+    res = 6
+    cell_column = gdf.geometry.apply(lambda x: h3.geo_to_cells(x, res=res))
+    shape_column = cell_column.apply(h3.cells_to_h3shape)
+    gdf.geometry = shape_column
+
+    cmap = {
     "Tsunami Warning": [253, 99, 71],
     "Tornado Warning": [255, 0, 0],
     "Extreme Wind Warning": [255, 140, 0],
@@ -146,6 +153,6 @@ def udf():
     }
 
     # Add 'r', 'g', and 'b' fields to the GeoDataFrame
-    hazards_gdf[['r', 'g', 'b']] = hazards_gdf['Hazard_Type'].apply(lambda hazard_type: pd.Series(hazards_cmap.get(hazard_type, [255, 0, 255])))
+    gdf[['r', 'g', 'b']] = gdf['Hazard_Type'].apply(lambda hazard_type: pd.Series(cmap.get(hazard_type, [255, 0, 255])))
     
-    return hazards_gdf
+    return gdf
