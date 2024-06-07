@@ -5,7 +5,7 @@ This Fused.io UDF fetches National Weather Service (NWS) / National Oceanic and 
 * [NWS Weather & Hazard Data Viewer](https://www.wrh.noaa.gov/map/)
 * [NWS Watch/Warning/Advisory (WWA) MapServer](https://mapservices.weather.noaa.gov/eventdriven/rest/services/WWA/watch_warn_adv/MapServer)
 * [NWS Hazard Map FAQ](https://www.weather.gov/help-map)
-* [`h3-py` Polygon Tutorial](https://uber.github.io/h3-py/polygon_tutorial.html#)
+* [h3-py Polygon Tutorial](https://uber.github.io/h3-py/polygon_tutorial.html#)
 
 # Terminology
 
