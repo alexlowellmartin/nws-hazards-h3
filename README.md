@@ -1,11 +1,6 @@
+<!--fused:readme-->
 # Overview
-This Fused.io UDF fetches National Weather Service (NWS) / National Oceanic and Atmospheric Admin (NOAA) weather & hazard data and returns a geodataframe.
-
-# External links
-* [NWS Weather & Hazard Data Viewer](https://www.wrh.noaa.gov/map/)
-* [NWS Watch/Warning/Advisory (WWA) MapServer](https://mapservices.weather.noaa.gov/eventdriven/rest/services/WWA/watch_warn_adv/MapServer)
-* [NWS Hazard Map FAQ](https://www.weather.gov/help-map)
-* [h3-py Polygon Tutorial](https://uber.github.io/h3-py/polygon_tutorial.html#)
+This Fused.io UDF fetches National Weather Service (NWS) / National Oceanic and Atmospheric Admin (NOAA) weather & hazard boundary polygons, converts their geometries to h3 cells at the users desired resolution (default res=7), and returns a GeoDataFrame.
 
 # Terminology
 
@@ -21,3 +16,8 @@ Advisory
 : The expected weather condition has a pretty good chance of occurring, even a likely chance of occurring, but typically an advisory is used for less severe type of weather conditions.
 : A Wind Advisory might be issued or a Freezing Rain Advisory issued instead of a High Wind Warning or an ice Storm Warning.
 
+# External links
+* [NWS Weather & Hazard Data Viewer](https://www.wrh.noaa.gov/map/)
+* [NWS Watch/Warning/Advisory (WWA) MapServer](https://mapservices.weather.noaa.gov/eventdriven/rest/services/WWA/watch_warn_adv/MapServer)
+* [NWS Hazard Map FAQ](https://www.weather.gov/help-map)
+* [h3-py Polygon Tutorial](https://uber.github.io/h3-py/polygon_tutorial.html)

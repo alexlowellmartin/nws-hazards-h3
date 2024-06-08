@@ -1,26 +1,26 @@
 @fused.udf
-def udf():
+def udf(crs="EPSG:4326", res=7):
     import pandas as pd
     import geopandas as gpd
     import h3
-    import json
-    from owslib.wfs import WebFeatureService
+    import requests
 
-    # WFS URL for the Watch Warning Advisory (WWA) service
-    wfs_url = "https://mapservices.weather.noaa.gov/eventdriven/services/WWA/watch_warn_adv/MapServer/WFSServer"
-
-    # Create WFS service
-    wfs = WebFeatureService(url=wfs_url, version='2.0.0')
-
-    # Fetch data for WatchesWarnings in GeoJSON format
-    response = wfs.getfeature(typename='watch_warn_adv:WatchesWarnings', outputFormat='GEOJSON')
-    geojson = response.read().decode('utf-8')
-
-    # Create GeoDataFrames from GeoJSON content
-    gdf = gpd.GeoDataFrame.from_features(json.loads(geojson)["features"], crs="EPSG:4326")
+    # URL for querying the WatchesWarnings layer of the Watch/Warning/Advisory (WWA) MapServer
+    url = "https://mapservices.weather.noaa.gov/eventdriven/rest/services/WWA/watch_warn_adv/MapServer/1/query"
+    params = {
+        "where": "1=1",  # Fetch all records
+        "outFields": "*",  # Get all fields
+        "f": "geojson"  # Request GeoJSON format
+    }
+    
+    # Fetch data
+    response = requests.get(url, params=params)
+    data = response.json()
+    
+    # Convert the GeoJSON data to a GeoDataFrame
+    gdf = gpd.GeoDataFrame.from_features(data["features"], crs=crs)
 
     # Convert GeoDataFrame geos to h3 cells
-    res = 6
     cell_column = gdf.geometry.apply(lambda x: h3.geo_to_cells(x, res=res))
     shape_column = cell_column.apply(h3.cells_to_h3shape)
     gdf.geometry = shape_column
@@ -153,6 +153,6 @@ def udf():
     }
 
     # Add 'r', 'g', and 'b' fields to the GeoDataFrame
-    gdf[['r', 'g', 'b']] = gdf['Hazard_Type'].apply(lambda hazard_type: pd.Series(cmap.get(hazard_type, [255, 0, 255])))
+    gdf[['r', 'g', 'b']] = gdf['prod_type'].apply(lambda prod_type: pd.Series(cmap.get(prod_type, [255, 0, 255])))
     
     return gdf
